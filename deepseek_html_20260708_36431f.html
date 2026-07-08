@@ -1,0 +1,3071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>❤️ Flutter — Dating App</title>
+    <style>
+        /* ─────────── RESET & BASE ─────────── */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary: #ff385c;
+            --primary-dark: #e0314e;
+            --primary-light: #ff6b81;
+            --bg: #f7f7f9;
+            --card-bg: #ffffff;
+            --text: #1a1a2e;
+            --text-secondary: #6b6b7a;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --radius: 28px;
+            --radius-sm: 16px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            touch-action: manipulation;
+        }
+
+        /* ─────────── APP CONTAINER ─────────── */
+        .app {
+            width: 100%;
+            max-width: 430px;
+            height: 100vh;
+            max-height: 932px;
+            background: var(--bg);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.06);
+        }
+        @media (min-width: 431px) {
+            .app {
+                border-radius: 40px;
+                margin-top: 20px;
+                height: calc(100vh - 40px);
+                max-height: 932px;
+            }
+        }
+
+        /* ─────────── SPLASH / LOGIN ─────────── */
+        .login-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, #fff 0%, #f8f4f5 100%);
+            z-index: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 28px;
+            border-radius: inherit;
+            transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .login-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.96);
+        }
+        .login-box {
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            padding: 8px 0;
+        }
+        .login-box .logo-big {
+            font-size: 52px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), #ff6b81);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+        .login-box .sub {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 28px;
+            font-weight: 400;
+        }
+        .login-box .input-group {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .login-box .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e8e8ea;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            outline: none;
+            background: #fff;
+            transition: border 0.25s, box-shadow 0.25s;
+            font-family: inherit;
+        }
+        .login-box .input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(255, 56, 92, 0.08);
+        }
+        .login-box .input-group label {
+            display: block;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            margin-left: 4px;
+        }
+        .login-box .btn-primary {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+            margin-top: 6px;
+            box-shadow: 0 4px 16px rgba(255, 56, 92, 0.3);
+        }
+        .login-box .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(255, 56, 92, 0.35);
+        }
+        .login-box .btn-primary:active {
+            transform: scale(0.97);
+        }
+        .login-box .btn-secondary {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 14px;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+        .login-box .btn-secondary:hover {
+            opacity: 0.7;
+        }
+        .login-box .error-msg {
+            color: #ff1744;
+            font-size: 13px;
+            min-height: 22px;
+            margin: 6px 0;
+        }
+        .login-box .success-msg {
+            color: #00c853;
+            font-size: 13px;
+            min-height: 22px;
+            margin: 6px 0;
+        }
+        .login-box .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0 16px;
+            color: #bbb;
+            font-size: 13px;
+        }
+        .login-box .divider::before,
+        .login-box .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e8e8ea;
+        }
+        .login-box .demo-hint {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 12px;
+            background: #f5f5f7;
+            padding: 10px 14px;
+            border-radius: 10px;
+            line-height: 1.5;
+        }
+        .login-box .demo-hint strong {
+            color: var(--text);
+        }
+
+        /* ─────────── MAIN APP SHELL ─────────── */
+        .app-main {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease 0.2s;
+        }
+        .app-main.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ─────────── HEADER ─────────── */
+        .header {
+            padding: 14px 20px 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            background: var(--bg);
+            z-index: 10;
+        }
+        .header .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .logo span {
+            color: var(--text);
+            -webkit-text-fill-color: var(--text);
+        }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .header-actions button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: transform 0.2s, color 0.2s;
+            padding: 4px;
+            position: relative;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .header-actions button:hover {
+            transform: scale(1.08);
+            background: rgba(0, 0, 0, 0.04);
+        }
+        .header-actions .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* ─────────── MAIN CONTENT ─────────── */
+        .main-content {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            padding: 4px 16px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ─── VIEWS ─── */
+        .view {
+            position: absolute;
+            inset: 0;
+            padding: 0 0 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            transform: translateY(12px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+        }
+        .view.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        .view::-webkit-scrollbar {
+            width: 0;
+        }
+
+        /* ─── STORIES ROW ─── */
+        .stories-wrapper {
+            flex-shrink: 0;
+            padding: 6px 0 10px;
+            background: var(--bg);
+            position: relative;
+            z-index: 2;
+        }
+        .stories-row {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            padding: 2px 2px 4px;
+        }
+        .stories-row::-webkit-scrollbar {
+            display: none;
+        }
+        .story-circle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+            min-width: 60px;
+        }
+        .story-circle:hover {
+            transform: scale(1.04);
+        }
+        .story-circle .avatar-wrap {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(135deg, #ff385c, #ff6b81, #ffb3b3);
+            position: relative;
+        }
+        .story-circle .avatar-wrap.add {
+            background: #e8e8ea;
+            border: 2px dashed #ccc;
+        }
+        .story-circle .avatar-wrap img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            background: #eee;
+        }
+        .story-circle .avatar-wrap .add-icon {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 300;
+            color: #999;
+            background: #f5f5f7;
+        }
+        .story-circle .avatar-wrap.viewed {
+            background: #ccc;
+        }
+        .story-circle .name {
+            font-size: 11px;
+            color: var(--text-secondary);
+            max-width: 64px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        .story-circle .name.you {
+            color: var(--primary);
+        }
+
+        /* ─── AD BANNER (in swipe) ─── */
+        .ad-banner {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #f0ecf7, #e8e4f0);
+            border-radius: var(--radius-sm);
+            padding: 10px 16px;
+            margin: 0 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border: 1px solid rgba(255, 56, 92, 0.08);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .ad-banner:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+        .ad-banner .ad-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        .ad-banner .ad-text {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .ad-banner .ad-text strong {
+            color: var(--text);
+            font-weight: 700;
+        }
+        .ad-banner .ad-cta {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s;
+        }
+        .ad-banner .ad-cta:hover {
+            transform: scale(1.04);
+        }
+        .ad-banner .ad-tag {
+            font-size: 9px;
+            text-transform: uppercase;
+            color: #aaa;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* ─── CARD STACK ─── */
+        .card-stack-wrap {
+            flex: 1;
+            position: relative;
+            min-height: 360px;
+            max-height: 520px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .card-stack {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 360px;
+            max-height: 520px;
+        }
+        .card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: var(--radius);
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.4s ease;
+            will-change: transform;
+            cursor: grab;
+            touch-action: none;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+        .card:active {
+            cursor: grabbing;
+        }
+        .card .card-img {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+            background: #e8e8ea;
+            display: block;
+        }
+        .card .card-info {
+            padding: 14px 18px 12px;
+            background: var(--card-bg);
+            height: 30%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card .card-info .name-age {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .card .card-info .name-age h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .card .card-info .name-age .age {
+            font-size: 17px;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+        .card .card-info .location {
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: -2px;
+        }
+        .card .card-info .bio {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-top: 2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .card .card-info .interests {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .card .card-info .interests span {
+            background: #f0f0f3;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .card .like-indicator,
+        .card .nope-indicator {
+            position: absolute;
+            top: 36px;
+            font-size: 40px;
+            font-weight: 800;
+            padding: 6px 18px;
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.25s;
+            transform: rotate(-20deg);
+            border: 3px solid;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(6px);
+            pointer-events: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+        .card .like-indicator {
+            right: 20px;
+            color: #00c853;
+            border-color: #00c853;
+            transform: rotate(16deg);
+        }
+        .card .nope-indicator {
+            left: 20px;
+            color: #ff1744;
+            border-color: #ff1744;
+            transform: rotate(-16deg);
+        }
+        .card .like-indicator.show,
+        .card .nope-indicator.show {
+            opacity: 1;
+        }
+        .card .online-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: #00c853;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(0, 200, 83, 0.3);
+        }
+        .card .online-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fff;
+            animation: pulse-dot 1.5s infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* ─── ACTION BUTTONS ─── */
+        .actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 0 4px;
+            flex-shrink: 0;
+            background: var(--bg);
+        }
+        .actions button {
+            border: none;
+            border-radius: 50%;
+            width: 58px;
+            height: 58px;
+            font-size: 26px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            font-family: inherit;
+        }
+        .actions button:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+        .actions button:active {
+            transform: scale(0.92);
+        }
+        .actions .btn-nope {
+            color: #ff1744;
+            background: #fff;
+            border: 2px solid #ff1744;
+            width: 54px;
+            height: 54px;
+            font-size: 28px;
+        }
+        .actions .btn-nope:hover {
+            background: #ff1744;
+            color: #fff;
+        }
+        .actions .btn-like {
+            color: #00c853;
+            background: #fff;
+            border: 2px solid #00c853;
+            width: 54px;
+            height: 54px;
+            font-size: 28px;
+        }
+        .actions .btn-like:hover {
+            background: #00c853;
+            color: #fff;
+        }
+        .actions .btn-super {
+            color: #2979ff;
+            background: #fff;
+            border: 2px solid #2979ff;
+            width: 46px;
+            height: 46px;
+            font-size: 20px;
+        }
+        .actions .btn-super:hover {
+            background: #2979ff;
+            color: #fff;
+        }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 24px;
+        }
+        .empty-state .icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+        }
+        .empty-state h3 {
+            font-size: 20px;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .empty-state p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            max-width: 240px;
+        }
+        .empty-state button {
+            margin-top: 16px;
+            padding: 12px 32px;
+            border: none;
+            border-radius: 30px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s;
+        }
+        .empty-state button:hover {
+            transform: scale(1.03);
+        }
+
+        /* ─── MATCHES VIEW ─── */
+        .matches-view .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            padding: 4px 4px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .matches-view .section-title span {
+            background: var(--primary);
+            color: #fff;
+            font-size: 13px;
+            padding: 0 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .match-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            background: #fff;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #f0f0f2;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+        }
+        .match-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        .match-item img {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #ddd;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .match-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+        .match-item .info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .match-item .info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .match-item .info .last-msg {
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px;
+        }
+        .match-item .chat-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        .match-item .chat-btn:hover {
+            transform: scale(1.04);
+        }
+        .match-item .unread-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+            flex-shrink: 0;
+        }
+        .no-matches {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        .no-matches .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        /* ─── AD IN MATCHES ─── */
+        .ad-match {
+            background: linear-gradient(135deg, #fff5f7, #fef0f2);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin: 4px 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255, 56, 92, 0.08);
+        }
+        .ad-match .ad-icon {
+            font-size: 22px;
+        }
+        .ad-match .ad-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .ad-match .ad-text strong {
+            color: var(--text);
+        }
+        .ad-match .ad-cta {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* ─── CHAT VIEW ─── */
+        .chat-view {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+        .chat-view .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 4px 12px;
+            border-bottom: 1px solid #f0f0f2;
+            flex-shrink: 0;
+        }
+        .chat-view .chat-header .back {
+            background: none;
+            border: none;
+            font-size: 26px;
+            cursor: pointer;
+            padding: 4px 8px;
+            color: var(--text);
+            font-family: inherit;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .chat-view .chat-header .back:hover {
+            background: #f0f0f2;
+        }
+        .chat-view .chat-header .chat-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+        .chat-view .chat-header .chat-user img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #ddd;
+        }
+        .chat-view .chat-header .chat-user .names {
+            min-width: 0;
+        }
+        .chat-view .chat-header .chat-user .names h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .chat-view .chat-header .chat-user .names .status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .chat-view .chat-header .chat-user .names .status.online {
+            color: #00c853;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 12px 4px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-height: 200px;
+            max-height: 420px;
+        }
+        .chat-messages .msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            animation: msgIn 0.3s ease;
+            position: relative;
+        }
+        .chat-messages .msg.sent {
+            align-self: flex-end;
+            background: var(--primary);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-messages .msg.received {
+            align-self: flex-start;
+            background: #f0f0f3;
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-messages .msg .time {
+            font-size: 10px;
+            opacity: 0.6;
+            margin-top: 4px;
+            display: block;
+            text-align: right;
+        }
+        .chat-messages .msg.sent .time {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .chat-messages .msg.received .time {
+            color: var(--text-secondary);
+        }
+        .chat-messages .typing-indicator {
+            align-self: flex-start;
+            background: #f0f0f3;
+            padding: 10px 16px;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .chat-messages .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            animation: typingBounce 1.4s infinite;
+        }
+        .chat-messages .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .chat-messages .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes typingBounce {
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-6px);
+            }
+        }
+        @keyframes msgIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .chat-input {
+            display: flex;
+            gap: 8px;
+            padding: 10px 0 4px;
+            border-top: 1px solid #f0f0f2;
+            flex-shrink: 0;
+            background: var(--bg);
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 2px solid #e8e8ea;
+            border-radius: 30px;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
+            font-family: inherit;
+            transition: border 0.2s;
+        }
+        .chat-input input:focus {
+            border-color: var(--primary);
+        }
+        .chat-input button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            background: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .chat-input button:hover {
+            transform: scale(1.03);
+            background: var(--primary-dark);
+        }
+        .chat-input button:active {
+            transform: scale(0.95);
+        }
+        .chat-ad {
+            flex-shrink: 0;
+            background: #f8f4f5;
+            border-radius: var(--radius-sm);
+            padding: 8px 14px;
+            margin: 4px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border: 1px solid #f0e8ea;
+        }
+        .chat-ad .ad-icon {
+            font-size: 18px;
+        }
+        .chat-ad .ad-cta {
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+        /* ─── PROFILE VIEW ─── */
+        .profile-view {
+            padding: 4px 0 8px;
+        }
+        .profile-view .profile-card {
+            background: #fff;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid #f0f0f2;
+        }
+        .profile-view .profile-card .cover {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #e8e8ea;
+        }
+        .profile-view .profile-card .info {
+            padding: 16px 18px 20px;
+        }
+        .profile-view .profile-card .info .name {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .profile-view .profile-card .info .detail {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .profile-view .profile-card .info .bio-text {
+            margin-top: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            padding: 12px 0;
+            border-top: 1px solid #f0f0f2;
+            border-bottom: 1px solid #f0f0f2;
+        }
+        .profile-view .profile-card .info .interests-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .profile-view .profile-card .info .interests-list span {
+            background: #f0f0f3;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .profile-view .edit-btn {
+            width: 100%;
+            margin-top: 14px;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--primary);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s;
+        }
+        .profile-view .edit-btn:hover {
+            transform: scale(1.02);
+        }
+        .profile-view .stats-row {
+            display: flex;
+            gap: 16px;
+            margin: 12px 0 4px;
+            justify-content: center;
+        }
+        .profile-view .stats-row .stat {
+            text-align: center;
+        }
+        .profile-view .stats-row .stat .num {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .profile-view .stats-row .stat .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* ─── MATCH POPUP ─── */
+        .match-popup-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.45s ease;
+            border-radius: inherit;
+        }
+        .match-popup-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .match-popup {
+            background: #fff;
+            border-radius: 32px;
+            padding: 36px 28px 28px;
+            max-width: 340px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.85);
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
+        }
+        .match-popup-overlay.show .match-popup {
+            transform: scale(1);
+        }
+        .match-popup .emoji-big {
+            font-size: 52px;
+            margin-bottom: 2px;
+        }
+        .match-popup h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 2px 0;
+        }
+        .match-popup p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin: 4px 0 14px;
+        }
+        .match-popup .match-users {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 10px 0 18px;
+        }
+        .match-popup .match-users img {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            background: #ddd;
+        }
+        .match-popup .match-users .plus {
+            font-size: 24px;
+            color: var(--primary);
+            font-weight: 300;
+        }
+        .match-popup .popup-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .match-popup .popup-actions button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s;
+            flex: 1;
+            min-width: 100px;
+        }
+        .match-popup .popup-actions button:hover {
+            transform: scale(1.04);
+        }
+        .match-popup .popup-actions .btn-chat {
+            background: var(--primary);
+            color: #fff;
+        }
+        .match-popup .popup-actions .btn-keep {
+            background: #f0f0f3;
+            color: var(--text);
+        }
+
+        /* ─── STORY VIEWER ─── */
+        .story-viewer-overlay {
+            position: absolute;
+            inset: 0;
+            background: #000;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+            border-radius: inherit;
+            overflow: hidden;
+        }
+        .story-viewer-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .story-viewer-overlay .story-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px 14px;
+            border-radius: 30px;
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .story-viewer-overlay .story-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .story-viewer-overlay .story-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .story-viewer-overlay .story-content img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #0a0a0a;
+        }
+        .story-viewer-overlay .story-content .story-caption {
+            position: absolute;
+            bottom: 50px;
+            left: 24px;
+            right: 24px;
+            color: #fff;
+            font-size: 16px;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 10px 16px;
+            border-radius: 12px;
+            backdrop-filter: blur(4px);
+        }
+        .story-viewer-overlay .story-user {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+        }
+        .story-viewer-overlay .story-user img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            object-fit: cover;
+        }
+        .story-viewer-overlay .story-progress {
+            position: absolute;
+            top: 44px;
+            left: 16px;
+            right: 16px;
+            display: flex;
+            gap: 4px;
+            z-index: 5;
+        }
+        .story-viewer-overlay .story-progress .bar {
+            flex: 1;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .story-viewer-overlay .story-progress .bar .fill {
+            height: 100%;
+            background: #fff;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        .story-viewer-overlay .story-progress .bar.active .fill {
+            animation: progressBar 5s linear forwards;
+        }
+        @keyframes progressBar {
+            from {
+                width: 0%;
+            }
+            to {
+                width: 100%;
+            }
+        }
+        .story-viewer-overlay .story-touch-area {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            z-index: 4;
+        }
+        .story-viewer-overlay .story-touch-area .half {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        /* ─── BOTTOM TAB ─── */
+        .bottom-tab {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 6px 8px calc(8px + var(--safe-bottom));
+            background: #fff;
+            border-top: 1px solid #f0f0f2;
+            flex-shrink: 0;
+            backdrop-filter: blur(20px);
+        }
+        .bottom-tab button {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+            padding: 4px 12px;
+            position: relative;
+            font-family: inherit;
+            min-width: 60px;
+        }
+        .bottom-tab button .icon {
+            font-size: 22px;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+        .bottom-tab button .label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+        .bottom-tab button.active {
+            color: var(--primary);
+        }
+        .bottom-tab button.active .icon {
+            transform: scale(1.08);
+        }
+        .bottom-tab button:hover {
+            transform: translateY(-2px);
+        }
+        .bottom-tab button .tab-badge {
+            position: absolute;
+            top: 0;
+            right: 4px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* ─── CONFETTI ─── */
+        .confetti-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 101;
+            border-radius: inherit;
+        }
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            animation: confettiFall linear forwards;
+            opacity: 0;
+        }
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-20px) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(calc(100vh)) rotate(720deg) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar {
+            width: 3px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 10px;
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 440px) {
+            .main-content {
+                padding: 4px 12px 0;
+            }
+            .card .card-img {
+                height: 68%;
+            }
+            .card .card-info {
+                height: 32%;
+                padding: 10px 14px 8px;
+            }
+            .card .card-info .name-age h3 {
+                font-size: 18px;
+            }
+            .actions button {
+                width: 48px;
+                height: 48px;
+                font-size: 22px;
+            }
+            .actions .btn-nope,
+            .actions .btn-like {
+                width: 46px;
+                height: 46px;
+                font-size: 24px;
+            }
+            .bottom-tab button .icon {
+                font-size: 20px;
+            }
+            .match-popup {
+                padding: 28px 20px 24px;
+            }
+            .story-circle .avatar-wrap {
+                width: 56px;
+                height: 56px;
+            }
+        }
+        @media (max-width: 380px) {
+            .header .logo {
+                font-size: 18px;
+            }
+            .card-stack-wrap {
+                min-height: 280px;
+                max-height: 400px;
+            }
+            .card-stack {
+                min-height: 280px;
+                max-height: 400px;
+            }
+        }
+
+        /* ─── TOAST ─── */
+        .toast {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(12px);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s, transform 0.4s;
+            z-index: 50;
+            white-space: nowrap;
+            max-width: 85%;
+            text-align: center;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app" id="app">
+
+        <!-- ─── LOGIN OVERLAY ─── -->
+        <div class="login-overlay" id="loginOverlay">
+            <div class="login-box">
+                <div class="logo-big">❤️ Flutter</div>
+                <p class="sub">Find your perfect match</p>
+
+                <div id="loginForm">
+                    <div class="input-group">
+                        <label>👤 Username</label>
+                        <input type="text" id="loginUsername" placeholder="Choose a username" value="alex" />
+                    </div>
+                    <div class="input-group">
+                        <label>📛 Display Name</label>
+                        <input type="text" id="loginDisplayName" placeholder="Your name" value="Alex" />
+                    </div>
+                    <div class="input-group">
+                        <label>🎂 Age (18+)</label>
+                        <input type="number" id="loginAge" placeholder="Your age" value="24" />
+                    </div>
+                    <div class="input-group">
+                        <label>📍 Location</label>
+                        <input type="text" id="loginLocation" placeholder="City, Country" value="Mumbai, India" />
+                    </div>
+                    <div class="input-group">
+                        <label>📝 Bio</label>
+                        <input type="text" id="loginBio" placeholder="Tell us about yourself" value="Adventurer & coffee lover ☕" />
+                    </div>
+                    <button class="btn-primary" id="loginBtn">✨ Create Account & Start</button>
+                    <div class="error-msg" id="loginError"></div>
+                    <div class="divider">or</div>
+                    <button class="btn-secondary" id="demoLoginBtn">🔑 Continue as Guest (Demo)</button>
+                    <div class="demo-hint">
+                        💡 <strong>Demo:</strong> Create any account or use guest mode. All data stored locally in your browser.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── MAIN APP ─── -->
+        <div class="app-main" id="appMain">
+
+            <!-- ─── HEADER ─── -->
+            <header class="header">
+                <div class="logo">❤️ Flutter</div>
+                <div class="header-actions">
+                    <button id="resetBtn" title="Reset Data">🔄</button>
+                    <button id="notifBtn" title="Notifications">
+                        🔔
+                        <span class="badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- ─── MAIN CONTENT ─── -->
+            <div class="main-content" id="mainContent">
+
+                <!-- SWIPE VIEW -->
+                <div class="view active" id="swipeView">
+                    <div class="stories-wrapper">
+                        <div class="stories-row" id="storiesRow"></div>
+                    </div>
+                    <!-- Ad Banner -->
+                    <div class="ad-banner" id="adBannerSwipe">
+                        <span class="ad-icon">💎</span>
+                        <span class="ad-text"><strong>Premium</strong> — See who liked you</span>
+                        <button class="ad-cta">Upgrade</button>
+                        <span class="ad-tag">Ad</span>
+                    </div>
+                    <div class="card-stack-wrap">
+                        <div class="card-stack" id="cardStack"></div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-nope" id="btnNope" aria-label="Pass">✖</button>
+                        <button class="btn-super" id="btnSuper" aria-label="Super Like">⭐</button>
+                        <button class="btn-like" id="btnLike" aria-label="Like">❤</button>
+                    </div>
+                </div>
+
+                <!-- MATCHES VIEW -->
+                <div class="view matches-view" id="matchesView">
+                    <div class="section-title">💬 Matches <span id="matchCountBadge">0</span></div>
+                    <!-- Ad in matches -->
+                    <div class="ad-match" id="adMatch">
+                        <span class="ad-icon">📱</span>
+                        <span class="ad-text">Get <strong>Flutter Premium</strong> — unlimited likes &amp; rewinds</span>
+                        <button class="ad-cta">Learn More</button>
+                    </div>
+                    <div id="matchesList"></div>
+                </div>
+
+                <!-- CHAT VIEW -->
+                <div class="view chat-view" id="chatView">
+                    <div class="chat-header">
+                        <button class="back" id="chatBack">‹</button>
+                        <div class="chat-user" id="chatUserInfo">
+                            <img id="chatAvatar" src="" alt="" />
+                            <div class="names">
+                                <h4 id="chatName">User</h4>
+                                <span class="status" id="chatStatus">online</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-ad" id="chatAd">
+                        <span class="ad-icon">💬</span>
+                        <span>Send GIFs &amp; voice notes with <strong>Flutter+</strong></span>
+                        <button class="ad-cta">Try</button>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Type a message..." />
+                        <button id="chatSend">Send</button>
+                    </div>
+                </div>
+
+                <!-- PROFILE VIEW -->
+                <div class="view profile-view" id="profileView">
+                    <div class="profile-card" id="profileCard">
+                        <img class="cover" id="profileCover" src="" alt="" />
+                        <div class="info">
+                            <div class="name" id="profileName">—</div>
+                            <div class="detail" id="profileAgeLocation">—</div>
+                            <div class="bio-text" id="profileBio">—</div>
+                            <div class="interests-list" id="profileInterests"></div>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat"><div class="num" id="statLikes">0</div><div class="label">Likes</div></div>
+                        <div class="stat"><div class="num" id="statMatches">0</div><div class="label">Matches</div></div>
+                        <div class="stat"><div class="num" id="statViews">0</div><div class="label">Profile Views</div></div>
+                    </div>
+                    <button class="edit-btn" id="profileEditBtn">✏️ Edit Profile</button>
+                </div>
+
+                <!-- ─── MATCH POPUP ─── -->
+                <div class="match-popup-overlay" id="matchPopup">
+                    <div class="match-popup">
+                        <div class="emoji-big">💞</div>
+                        <h2>It's a Match!</h2>
+                        <p>You and <span id="matchName">—</span> liked each other.</p>
+                        <div class="match-users">
+                            <img id="matchMyImg" src="" alt="You" />
+                            <span class="plus">+</span>
+                            <img id="matchOtherImg" src="" alt="Match" />
+                        </div>
+                        <div class="popup-actions">
+                            <button class="btn-chat" id="matchChatBtn">💬 Chat</button>
+                            <button class="btn-keep" id="matchKeepBtn">Keep Swiping</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── STORY VIEWER ─── -->
+                <div class="story-viewer-overlay" id="storyViewer">
+                    <button class="story-close" id="storyClose">✕</button>
+                    <div class="story-content" id="storyContent">
+                        <div class="story-progress" id="storyProgress"></div>
+                        <div class="story-user" id="storyUserInfo">
+                            <img id="storyUserAvatar" src="" alt="" />
+                            <span id="storyUserName">User</span>
+                        </div>
+                        <img id="storyImage" src="" alt="Story" />
+                        <div class="story-caption" id="storyCaption">Caption</div>
+                        <div class="story-touch-area">
+                            <div class="half left" id="storyPrev"></div>
+                            <div class="half right" id="storyNext"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── CONFETTI ─── -->
+                <div class="confetti-container" id="confettiContainer"></div>
+
+                <!-- ─── TOAST ─── -->
+                <div class="toast" id="toast"></div>
+
+            </div>
+
+            <!-- ─── BOTTOM TAB ─── -->
+            <div class="bottom-tab">
+                <button class="active" data-tab="swipe">
+                    <span class="icon">🔥</span>
+                    <span class="label">Swipe</span>
+                </button>
+                <button data-tab="matches">
+                    <span class="icon">💬</span>
+                    <span class="label">Matches</span>
+                    <span class="tab-badge" id="matchTabBadge" style="display:none;">0</span>
+                </button>
+                <button data-tab="profile">
+                    <span class="icon">👤</span>
+                    <span class="label">Profile</span>
+                </button>
+            </div>
+
+        </div><!-- /app-main -->
+    </div><!-- /app -->
+
+    <script>
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  DATA — Built-in users (for demo / matching)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        const BUILTIN_USERS = [{
+            id: 101,
+            name: 'Priya Sharma',
+            age: 24,
+            location: 'Mumbai, India',
+            bio: '🌏 Travel junkie | ☕ Coffee addict | 📸 Capturing moments. Let\'s explore the world together!',
+            interests: ['Travel', 'Photography', 'Coffee'],
+            image: 'https://i.pravatar.cc/400?img=1',
+            online: true,
+            stories: [
+                { image: 'https://picsum.photos/400/800?random=11', caption: 'Exploring the mountains 🏔️' },
+                { image: 'https://picsum.photos/400/800?random=12', caption: 'Coffee time ☕' },
+            ]
+        }, {
+            id: 102,
+            name: 'Arjun Reddy',
+            age: 27,
+            location: 'Bangalore, India',
+            bio: '🚀 Tech enthusiast & startup founder. Love hiking, gaming, and late-night coding.',
+            interests: ['Tech', 'Hiking', 'Gaming'],
+            image: 'https://i.pravatar.cc/400?img=11',
+            online: false,
+            stories: [
+                { image: 'https://picsum.photos/400/800?random=21', caption: 'Coding till dawn 💻' },
+            ]
+        }, {
+            id: 103,
+            name: 'Sneha Patel',
+            age: 23,
+            location: 'Delhi, India',
+            bio: '🎭 Theatre actor & dancer. Living life one performance at a time. 😊',
+            interests: ['Dance', 'Theatre', 'Music'],
+            image: 'https://i.pravatar.cc/400?img=5',
+            online: true,
+            stories: [
+                { image: 'https://picsum.photos/400/800?random=31', caption: 'Rehearsal mode 🎭' },
+                { image: 'https://picsum.photos/400/800?random=32', caption: 'Dance practice 💃' },
+            ]
+        }, {
+            id: 104,
+            name: 'Vikram Singh',
+            age: 29,
+            location: 'Hyderabad, India',
+            bio: '🏏 Cricket fan | 📚 Bookworm | 🍕 Pizza lover. Looking for my partner in crime.',
+            interests: ['Cricket', 'Reading', 'Food'],
+            image: 'https://i.pravatar.cc/400?img=12',
+            online: false,
+            stories: []
+        }, {
+            id: 105,
+            name: 'Ananya Iyer',
+            age: 25,
+            location: 'Chennai, India',
+            bio: '🎨 Artist & designer. Finding beauty in the little things. Let\'s create together.',
+            interests: ['Art', 'Design', 'Nature'],
+            image: 'https://i.pravatar.cc/400?img=9',
+            online: true,
+            stories: [
+                { image: 'https://picsum.photos/400/800?random=51', caption: 'Art in progress 🎨' },
+            ]
+        }, {
+            id: 106,
+            name: 'Rohit Mehta',
+            age: 26,
+            location: 'Pune, India',
+            bio: '🏋️ Fitness freak | 🎸 Guitar player | 🌱 Plant dad. Good vibes only!',
+            interests: ['Fitness', 'Music', 'Plants'],
+            image: 'https://i.pravatar.cc/400?img=7',
+            online: false,
+            stories: []
+        }, {
+            id: 107,
+            name: 'Kavya Nair',
+            age: 22,
+            location: 'Kochi, India',
+            bio: '🌊 Beach lover | 📝 Writer | 🧘‍♀️ Yoga. Deep conversations & laughter.',
+            interests: ['Writing', 'Yoga', 'Beach'],
+            image: 'https://i.pravatar.cc/400?img=10',
+            online: true,
+            stories: [
+                { image: 'https://picsum.photos/400/800?random=71', caption: 'Sunset at the beach 🌅' },
+                { image: 'https://picsum.photos/400/800?random=72', caption: 'Writing my new poem 📝' },
+            ]
+        }, {
+            id: 108,
+            name: 'Amit Kumar',
+            age: 28,
+            location: 'Jaipur, India',
+            bio: '🏛️ History buff | 🍛 Food explorer | 📷 Street photographer. Wander & wonder.',
+            interests: ['History', 'Food', 'Photography'],
+            image: 'https://i.pravatar.cc/400?img=20',
+            online: false,
+            stories: []
+        }, {
+            id: 109,
+            name: 'Riya Das',
+            age: 24,
+            location: 'Kolkata, India',
+            bio: '🎶 Music is my religion | 📖 Poetry | ☕ Chai over everything.',
+            interests: ['Music', 'Poetry', 'Chai'],
+            image: 'https://i.pravatar.cc/400?img=25',
+            online: true,
+            stories: [
+                { image: 'https://picsum.photos/400/800?random=91', caption: 'Chai time with my guitar 🎸' },
+            ]
+        }, {
+            id: 110,
+            name: 'Dev Patel',
+            age: 26,
+            location: 'Ahmedabad, India',
+            bio: '🚴‍♂️ Cyclist | 💻 Developer | 🎮 Gamer. Balancing screens & pedals.',
+            interests: ['Cycling', 'Coding', 'Gaming'],
+            image: 'https://i.pravatar.cc/400?img=33',
+            online: false,
+            stories: []
+        }, {
+            id: 111,
+            name: 'Maya Krishnan',
+            age: 25,
+            location: 'Coimbatore, India',
+            bio: '🌿 Nature lover | 🧁 Baker | 📸 Nature photographer. Sweetness & serenity.',
+            interests: ['Nature', 'Baking', 'Photography'],
+            image: 'https://i.pravatar.cc/400?img=45',
+            online: true,
+            stories: [
+                { image: 'https://picsum.photos/400/800?random=111', caption: 'Freshly baked cookies 🍪' },
+                { image: 'https://picsum.photos/400/800?random=112', caption: 'Nature walk 🌿' },
+            ]
+        }, {
+            id: 112,
+            name: 'Kabir Singh',
+            age: 27,
+            location: 'Lucknow, India',
+            bio: '🎭 Stand-up comedy | 📝 Writer | 🍜 Foodie. Making the world laugh.',
+            interests: ['Comedy', 'Writing', 'Food'],
+            image: 'https://i.pravatar.cc/400?img=60',
+            online: false,
+            stories: []
+        }];
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  STORAGE HELPERS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        const STORAGE_KEY = 'flutter_app_data';
+
+        function loadData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch (_) { /* ignore */ }
+            return null;
+        }
+
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function getDefaultData() {
+            return {
+                users: BUILTIN_USERS.map(u => ({ ...u })),
+                currentUser: null,
+                matches: [], // array of user ids
+                liked: [], // user ids liked by current user
+                passed: [], // user ids passed
+                chatMessages: {}, // { userId: [ {text, fromMe, time} ] }
+                storyViews: {}, // { userId: true } for viewed stories
+                profileViews: 0,
+            };
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  STATE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        let appData = loadData() || getDefaultData();
+        let currentUser = appData.currentUser ? appData.users.find(u => u.id === appData.currentUser) : null;
+        let state = {
+            currentIndex: 0,
+            isAnimating: false,
+            currentCardEl: null,
+            cardData: null,
+            currentView: 'swipe',
+            selectedChatId: null,
+            storyUser: null,
+            storyIndex: 0,
+            storyTimer: null,
+            isTyping: false,
+        };
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  DOM REFS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        const $ = (s) => document.querySelector(s);
+        const $$ = (s) => document.querySelectorAll(s);
+
+        const loginOverlay = $('#loginOverlay');
+        const appMain = $('#appMain');
+        const loginUsername = $('#loginUsername');
+        const loginDisplayName = $('#loginDisplayName');
+        const loginAge = $('#loginAge');
+        const loginLocation = $('#loginLocation');
+        const loginBio = $('#loginBio');
+        const loginBtn = $('#loginBtn');
+        const demoLoginBtn = $('#demoLoginBtn');
+        const loginError = $('#loginError');
+
+        const cardStack = $('#cardStack');
+        const swipeView = $('#swipeView');
+        const matchesView = $('#matchesView');
+        const chatView = $('#chatView');
+        const profileView = $('#profileView');
+        const matchesList = $('#matchesList');
+        const matchCountBadge = $('#matchCountBadge');
+        const matchPopup = $('#matchPopup');
+        const matchName = $('#matchName');
+        const matchMyImg = $('#matchMyImg');
+        const matchOtherImg = $('#matchOtherImg');
+        const matchChatBtn = $('#matchChatBtn');
+        const matchKeepBtn = $('#matchKeepBtn');
+        const confettiContainer = $('#confettiContainer');
+        const notifBadge = $('#notifBadge');
+        const matchTabBadge = $('#matchTabBadge');
+        const btnLike = $('#btnLike');
+        const btnNope = $('#btnNope');
+        const btnSuper = $('#btnSuper');
+        const resetBtn = $('#resetBtn');
+        const notifBtn = $('#notifBtn');
+        const toast = $('#toast');
+        let toastTimer = null;
+
+        // chat
+        const chatBack = $('#chatBack');
+        const chatAvatar = $('#chatAvatar');
+        const chatName = $('#chatName');
+        const chatStatus = $('#chatStatus');
+        const chatMessagesEl = $('#chatMessages');
+        const chatInput = $('#chatInput');
+        const chatSend = $('#chatSend');
+
+        // profile
+        const profileCover = $('#profileCover');
+        const profileName = $('#profileName');
+        const profileAgeLocation = $('#profileAgeLocation');
+        const profileBio = $('#profileBio');
+        const profileInterests = $('#profileInterests');
+        const profileEditBtn = $('#profileEditBtn');
+        const statLikes = $('#statLikes');
+        const statMatches = $('#statMatches');
+        const statViews = $('#statViews');
+
+        // stories
+        const storiesRow = $('#storiesRow');
+        const storyViewer = $('#storyViewer');
+        const storyClose = $('#storyClose');
+        const storyProgress = $('#storyProgress');
+        const storyUserAvatar = $('#storyUserAvatar');
+        const storyUserName = $('#storyUserName');
+        const storyImage = $('#storyImage');
+        const storyCaption = $('#storyCaption');
+        const storyPrev = $('#storyPrev');
+        const storyNext = $('#storyNext');
+
+        // ads
+        const adBannerSwipe = $('#adBannerSwipe');
+        const adMatch = $('#adMatch');
+        const chatAd = $('#chatAd');
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  TOAST
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function showToast(msg, duration = 2200) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  AUTH / LOGIN  (FIXED)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function createUser(username, displayName, age, location, bio) {
+            const id = Date.now() + Math.floor(Math.random() * 1000);
+            const newUser = {
+                id,
+                name: displayName || username,
+                age: parseInt(age) || 22,
+                location: location || 'Unknown',
+                bio: bio || 'Just here to meet new people! 😊',
+                interests: ['Travel', 'Music', 'Food'],
+                image: `https://i.pravatar.cc/400?img=${Math.floor(Math.random() * 70) + 1}`,
+                online: true,
+                stories: [],
+                username: username,
+                createdAt: new Date().toISOString(),
+            };
+            appData.users.push(newUser);
+            appData.currentUser = id;
+            appData.liked = [];
+            appData.passed = [];
+            appData.matches = [];
+            appData.chatMessages = {};
+            appData.storyViews = {};
+            appData.profileViews = 0;
+            saveData(appData);
+            currentUser = newUser;
+            return newUser;
+        }
+
+        function loginUser(userId) {
+            const user = appData.users.find(u => u.id === userId);
+            if (!user) return false;
+            appData.currentUser = userId;
+            appData.liked = [];
+            appData.passed = [];
+            saveData(appData);
+            currentUser = user;
+            return true;
+        }
+
+        // ─── FIXED LOGIN HANDLER ───
+        loginBtn.addEventListener('click', () => {
+            const username = loginUsername.value.trim();
+            const displayName = loginDisplayName.value.trim();
+            const age = loginAge.value.trim();
+            const location = loginLocation.value.trim();
+            const bio = loginBio.value.trim();
+
+            // Clear previous error
+            loginError.textContent = '';
+
+            // Validation
+            if (!username) {
+                loginError.textContent = 'Please enter a username.';
+                return;
+            }
+            if (!displayName) {
+                loginError.textContent = 'Please enter your display name.';
+                return;
+            }
+            if (!age || isNaN(parseInt(age)) || parseInt(age) < 18) {
+                loginError.textContent = 'Please enter a valid age (18+).';
+                return;
+            }
+            if (!location) {
+                loginError.textContent = 'Please enter your location.';
+                return;
+            }
+            if (!bio) {
+                loginError.textContent = 'Please enter a short bio.';
+                return;
+            }
+
+            // Check if username exists
+            const existing = appData.users.find(u => u.username === username);
+            if (existing) {
+                // Login as existing user
+                if (loginUser(existing.id)) {
+                    loginError.textContent = '';
+                    initApp();
+                    console.log('Logged in as existing user:', existing.name);
+                } else {
+                    loginError.textContent = 'Could not login. Please try again.';
+                }
+                return;
+            }
+
+            // Create new user
+            const user = createUser(username, displayName, age, location, bio);
+            loginError.textContent = '';
+            initApp();
+            console.log('New user created:', user.name);
+        });
+
+        demoLoginBtn.addEventListener('click', () => {
+            let demoUser = appData.users.find(u => u.username === 'guest_demo');
+            if (!demoUser) {
+                demoUser = createUser('guest_demo', 'Guest User', 25, 'San Francisco, CA', 'Just exploring! 🌟');
+                demoUser.image = `https://i.pravatar.cc/400?img=${Math.floor(Math.random() * 70) + 1}`;
+                saveData(appData);
+            }
+            if (loginUser(demoUser.id)) {
+                loginError.textContent = '';
+                initApp();
+                console.log('Guest login:', demoUser.name);
+            }
+        });
+
+        // Allow Enter key on login form
+        document.querySelectorAll('#loginForm input').forEach(inp => {
+            inp.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') loginBtn.click();
+            });
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  HELPERS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function getAvailableUsers() {
+            if (!currentUser) return [];
+            return appData.users.filter(u =>
+                u.id !== currentUser.id &&
+                !appData.liked.includes(u.id) &&
+                !appData.passed.includes(u.id)
+            );
+        }
+
+        function getNextUser() {
+            const available = getAvailableUsers();
+            if (available.length === 0) return null;
+            for (let i = state.currentIndex; i < available.length; i++) {
+                return available[i];
+            }
+            return available[0];
+        }
+
+        function getMatchCount() {
+            return appData.matches.length;
+        }
+
+        function updateBadges() {
+            const count = getMatchCount();
+            if (count > 0) {
+                notifBadge.textContent = count;
+                notifBadge.style.display = 'flex';
+                matchTabBadge.textContent = count;
+                matchTabBadge.style.display = 'flex';
+                matchCountBadge.textContent = count;
+            } else {
+                notifBadge.style.display = 'none';
+                matchTabBadge.style.display = 'none';
+                matchCountBadge.textContent = '0';
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  RENDER CARDS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function renderCard(user) {
+            if (!user) return null;
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.userId = user.id;
+
+            const img = document.createElement('img');
+            img.className = 'card-img';
+            img.src = user.image;
+            img.alt = user.name;
+            img.loading = 'lazy';
+            img.onerror = () => { img.src =
+                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect fill="%23e8e8ea" width="400" height="400"/%3E%3Ctext x="200" y="200" font-size="40" text-anchor="middle" dy=".35em" fill="%23999"%3E📸%3C/text%3E%3C/svg%3E'; };
+
+            if (user.online) {
+                const badge = document.createElement('div');
+                badge.className = 'online-badge';
+                badge.textContent = 'Online';
+                card.appendChild(badge);
+            }
+
+            const likeInd = document.createElement('div');
+            likeInd.className = 'like-indicator';
+            likeInd.textContent = '❤️ LIKE';
+            const nopeInd = document.createElement('div');
+            nopeInd.className = 'nope-indicator';
+            nopeInd.textContent = '✖️ NOPE';
+
+            const info = document.createElement('div');
+            info.className = 'card-info';
+            info.innerHTML = `
+            <div>
+              <div class="name-age">
+                <h3>${user.name}</h3>
+                <span class="age">${user.age}</span>
+              </div>
+              <div class="location">📍 ${user.location}</div>
+              <div class="bio">${user.bio}</div>
+            </div>
+            <div class="interests">
+              ${(user.interests || []).map(i => `<span>#${i}</span>`).join('')}
+            </div>
+          `;
+
+            card.append(img, likeInd, nopeInd, info);
+            return card;
+        }
+
+        function renderStack() {
+            if (!currentUser) return;
+            const user = getNextUser();
+            if (!user) {
+                cardStack.innerHTML = `
+              <div class="empty-state">
+                <div class="icon">🎉</div>
+                <h3>You've seen everyone!</h3>
+                <p>You liked ${appData.liked.length} people and matched with ${appData.matches.length}.</p>
+                <button onclick="resetApp()">🔄 Start Over</button>
+              </div>
+            `;
+                return;
+            }
+
+            cardStack.innerHTML = '';
+            const card = renderCard(user);
+            if (card) {
+                cardStack.appendChild(card);
+                state.currentCardEl = card;
+                state.cardData = user;
+                setupCardDrag(card, user);
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  CARD DRAG (unchanged)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function setupCardDrag(card, user) {
+            let isDragging = false;
+            let startX = 0,
+                startY = 0;
+            let currentX = 0,
+                currentY = 0;
+            let rotation = 0;
+
+            const likeInd = card.querySelector('.like-indicator');
+            const nopeInd = card.querySelector('.nope-indicator');
+
+            function onStart(e) {
+                if (state.isAnimating) return;
+                const touch = e.touches ? e.touches[0] : e;
+                isDragging = true;
+                startX = touch.clientX;
+                startY = touch.clientY;
+                currentX = 0;
+                currentY = 0;
+                card.style.transition = 'none';
+                card.style.cursor = 'grabbing';
+            }
+
+            function onMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                const touch = e.touches ? e.touches[0] : e;
+                const dx = touch.clientX - startX;
+                const dy = touch.clientY - startY;
+                currentX = dx;
+                currentY = dy;
+                rotation = dx * 0.06;
+
+                card.style.transform = `translate(${dx}px, ${dy}px) rotate(${rotation}deg)`;
+
+                const threshold = 60;
+                const like = dx > threshold;
+                const nope = dx < -threshold;
+                likeInd.classList.toggle('show', like);
+                nopeInd.classList.toggle('show', nope);
+
+                const progress = Math.min(Math.abs(dx) / 150, 1);
+                card.style.opacity = 1 - progress * 0.3;
+            }
+
+            function onEnd(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                card.style.cursor = 'grab';
+
+                const threshold = 100;
+                if (Math.abs(currentX) > threshold) {
+                    if (currentX > 0) {
+                        likeUser(user, card);
+                    } else {
+                        passUser(user, card);
+                    }
+                } else {
+                    card.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease';
+                    card.style.transform = 'translate(0, 0) rotate(0deg)';
+                    card.style.opacity = '1';
+                    likeInd.classList.remove('show');
+                    nopeInd.classList.remove('show');
+                }
+                currentX = 0;
+                currentY = 0;
+                rotation = 0;
+            }
+
+            card.addEventListener('mousedown', onStart);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onEnd);
+
+            card.addEventListener('touchstart', onStart, { passive: true });
+            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('touchend', onEnd, { passive: true });
+
+            card._cleanup = () => {
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onEnd);
+                window.removeEventListener('touchmove', onMove);
+                window.removeEventListener('touchend', onEnd);
+            };
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  LIKE / PASS (unchanged)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function likeUser(user, cardEl) {
+            if (state.isAnimating || !currentUser) return;
+            state.isAnimating = true;
+
+            const card = cardEl || state.currentCardEl;
+            if (card) {
+                const likeInd = card.querySelector('.like-indicator');
+                likeInd.classList.add('show');
+                card.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1), opacity 0.4s ease';
+                card.style.transform = 'translate(120%, -40px) rotate(20deg)';
+                card.style.opacity = '0';
+            }
+
+            if (!appData.liked.includes(user.id)) {
+                appData.liked.push(user.id);
+            }
+
+            const willMatch = Math.random() < 0.30 || [101, 103, 105, 107, 109, 111].includes(user.id);
+            if (willMatch && !appData.matches.includes(user.id)) {
+                appData.matches.push(user.id);
+                if (!appData.chatMessages[user.id]) {
+                    appData.chatMessages[user.id] = [
+                        { text: `Hey ${user.name}! It's a match! 😍`, fromMe: true, time: new Date().toISOString() },
+                        { text: `Hi! So glad we matched! How are you?`, fromMe: false, time: new Date().toISOString() },
+                    ];
+                }
+                saveData(appData);
+                updateBadges();
+                setTimeout(() => {
+                    showMatchPopup(user);
+                    state.isAnimating = false;
+                }, 450);
+            } else {
+                saveData(appData);
+                updateBadges();
+                setTimeout(() => {
+                    state.isAnimating = false;
+                    renderStack();
+                }, 450);
+            }
+        }
+
+        function passUser(user, cardEl) {
+            if (state.isAnimating || !currentUser) return;
+            state.isAnimating = true;
+
+            const card = cardEl || state.currentCardEl;
+            if (card) {
+                const nopeInd = card.querySelector('.nope-indicator');
+                nopeInd.classList.add('show');
+                card.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1), opacity 0.4s ease';
+                card.style.transform = 'translate(-120%, -40px) rotate(-20deg)';
+                card.style.opacity = '0';
+            }
+
+            if (!appData.passed.includes(user.id)) {
+                appData.passed.push(user.id);
+            }
+            saveData(appData);
+            updateBadges();
+
+            setTimeout(() => {
+                state.isAnimating = false;
+                renderStack();
+            }, 450);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  MATCH POPUP (unchanged)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function showMatchPopup(user) {
+            matchName.textContent = user.name;
+            matchMyImg.src = currentUser.image;
+            matchMyImg.onerror = () => { matchMyImg.src =
+                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect fill="%23e8e8ea" width="100" height="100"/%3E%3Ctext x="50" y="50" font-size="30" text-anchor="middle" dy=".35em" fill="%23999"%3E📸%3C/text%3E%3C/svg%3E'; };
+            matchOtherImg.src = user.image;
+            matchOtherImg.onerror = () => { matchOtherImg.src =
+                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect fill="%23e8e8ea" width="100" height="100"/%3E%3Ctext x="50" y="50" font-size="30" text-anchor="middle" dy=".35em" fill="%23999"%3E📸%3C/text%3E%3C/svg%3E'; };
+
+            matchPopup.classList.add('show');
+            spawnConfetti();
+
+            matchChatBtn.dataset.userId = user.id;
+            matchKeepBtn.dataset.userId = user.id;
+        }
+
+        function spawnConfetti() {
+            const container = confettiContainer;
+            container.innerHTML = '';
+            const colors = ['#ff385c', '#ff6b81', '#ffb3b3', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6b6b', '#845ef7'];
+            for (let i = 0; i < 60; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                el.style.left = Math.random() * 100 + '%';
+                el.style.top = '-10px';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.width = 6 + Math.random() * 8 + 'px';
+                el.style.height = 6 + Math.random() * 8 + 'px';
+                el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                el.style.animationDuration = 2 + Math.random() * 2 + 's';
+                el.style.animationDelay = Math.random() * 0.8 + 's';
+                container.appendChild(el);
+            }
+            setTimeout(() => { container.innerHTML = ''; }, 4000);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  MATCHES LIST (unchanged)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function renderMatches() {
+            if (!currentUser) return;
+            const matchUsers = appData.matches.map(id => appData.users.find(u => u.id === id)).filter(Boolean);
+
+            if (matchUsers.length === 0) {
+                matchesList.innerHTML = `
+              <div class="no-matches">
+                <div class="icon">💔</div>
+                <p>No matches yet. Keep swiping!</p>
+              </div>
+            `;
+                return;
+            }
+
+            matchesList.innerHTML = matchUsers.map(u => {
+                const msgs = appData.chatMessages[u.id] || [];
+                const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : 'Start chatting!';
+                const isFromMe = msgs.length > 0 && msgs[msgs.length - 1].fromMe;
+                const preview = (isFromMe ? 'You: ' : '') + lastMsg;
+                return `
+              <div class="match-item" data-userid="${u.id}">
+                <img src="${u.image}" alt="${u.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%2256%22 viewBox=%220 0 56 56%22%3E%3Crect fill=%22%23e8e8ea%22 width=%2256%22 height=%2256%22/%3E%3Ctext x=%2228%22 y=%2228%22 font-size=%2224%22 text-anchor=%22middle%22 dy=%22.35em%22 fill=%22%23999%22%3E📸%3C/text%3E%3C/svg%3E'" />
+                <div class="info">
+                  <h4>${u.name}</h4>
+                  <p>${u.age} · ${u.location.split(',')[0]}</p>
+                  <div class="last-msg">${preview}</div>
+                </div>
+                <button class="chat-btn" data-userid="${u.id}">💬 Chat</button>
+              </div>
+            `;
+            }).join('');
+
+            matchesList.querySelectorAll('.match-item').forEach(el => {
+                const uid = parseInt(el.dataset.userid);
+                el.addEventListener('click', () => openChat(uid));
+                const btn = el.querySelector('.chat-btn');
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openChat(uid);
+                    });
+                }
+            });
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  CHAT (unchanged)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function openChat(userId) {
+            const user = appData.users.find(u => u.id === userId);
+            if (!user || !currentUser) return;
+            state.selectedChatId = userId;
+            if (!appData.chatMessages[userId]) {
+                appData.chatMessages[userId] = [
+                    { text: `Hi! Let's chat 😊`, fromMe: false, time: new Date().toISOString() },
+                ];
+                saveData(appData);
+            }
+            renderChat(user);
+            switchView('chat');
+        }
+
+        function renderChat(user) {
+            chatAvatar.src = user.image;
+            chatAvatar.onerror = () => { chatAvatar.src =
+                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Crect fill="%23e8e8ea" width="40" height="40"/%3E%3Ctext x="20" y="20" font-size="18" text-anchor="middle" dy=".35em" fill="%23999"%3E📸%3C/text%3E%3C/svg%3E'; };
+            chatName.textContent = user.name;
+            chatStatus.textContent = user.online ? '🟢 Online' : '⚪ Offline';
+            chatStatus.className = 'status' + (user.online ? ' online' : '');
+
+            const msgs = appData.chatMessages[user.id] || [];
+            chatMessagesEl.innerHTML = msgs.map(m => `
+            <div class="msg ${m.fromMe ? 'sent' : 'received'}">
+              ${m.text}
+              <span class="time">${formatTime(m.time)}</span>
+            </div>
+          `).join('');
+            chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+            chatInput.value = '';
+            chatInput.focus();
+        }
+
+        function formatTime(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function sendChatMessage() {
+            const text = chatInput.value.trim();
+            if (!text || state.selectedChatId === null || !currentUser) return;
+            const uid = state.selectedChatId;
+            if (!appData.chatMessages[uid]) appData.chatMessages[uid] = [];
+            appData.chatMessages[uid].push({ text, fromMe: true, time: new Date().toISOString() });
+            chatInput.value = '';
+            saveData(appData);
+            const user = appData.users.find(u => u.id === uid);
+            if (user) renderChat(user);
+
+            const targetUser = appData.users.find(u => u.id === uid);
+            if (targetUser && targetUser.online) {
+                const typingEl = document.createElement('div');
+                typingEl.className = 'typing-indicator';
+                typingEl.id = 'typingIndicator';
+                typingEl.innerHTML = '<span></span><span></span><span></span>';
+                chatMessagesEl.appendChild(typingEl);
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+
+                setTimeout(() => {
+                    const typingInd = document.getElementById('typingIndicator');
+                    if (typingInd) typingInd.remove();
+                    const replies = [
+                        'That\'s awesome! 😊', 'I totally agree!', 'Tell me more about that.',
+                        'Haha, you\'re funny! 😄', 'Interesting!', 'I was thinking the same!',
+                        'Wow, really?', 'That\'s so cool!', 'I love that!',
+                        'You\'re sweet 🥰', 'Haha okay 😂', 'I see what you mean.',
+                        'Definitely!', 'Oh, I need to try that!', 'You\'re making me smile 😊'
+                    ];
+                    const reply = replies[Math.floor(Math.random() * replies.length)];
+                    if (!appData.chatMessages[uid]) appData.chatMessages[uid] = [];
+                    appData.chatMessages[uid].push({ text: reply, fromMe: false, time: new Date().toISOString() });
+                    saveData(appData);
+                    const user2 = appData.users.find(u => u.id === uid);
+                    if (user2) renderChat(user2);
+                }, 1400 + Math.random() * 1200);
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  STORIES (unchanged)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function renderStories() {
+            if (!currentUser) return;
+            const usersWithStories = appData.users.filter(u =>
+                u.id !== currentUser.id && u.stories && u.stories.length > 0
+            );
+            const hasMyStory = currentUser.stories && currentUser.stories.length > 0;
+
+            let html = '';
+            html += `
+            <div class="story-circle" data-userid="${currentUser.id}" data-add="true">
+              <div class="avatar-wrap add">
+                <div class="add-icon">+</div>
+              </div>
+              <span class="name you">Add Story</span>
+            </div>
+          `;
+
+            usersWithStories.forEach(u => {
+                const viewed = appData.storyViews && appData.storyViews[u.id];
+                html += `
+              <div class="story-circle" data-userid="${u.id}" data-add="false">
+                <div class="avatar-wrap ${viewed ? 'viewed' : ''}">
+                  <img src="${u.image}" alt="${u.name}" />
+                </div>
+                <span class="name">${u.name}</span>
+              </div>
+            `;
+            });
+
+            storiesRow.innerHTML = html;
+
+            storiesRow.querySelectorAll('.story-circle').forEach(el => {
+                el.addEventListener('click', () => {
+                    const uid = parseInt(el.dataset.userid);
+                    const add = el.dataset.add === 'true';
+                    if (add) {
+                        const url = prompt('Enter image URL for your story:', 'https://picsum.photos/400/800?random=' +
+                            Math.floor(Math.random() * 1000));
+                        if (url) {
+                            if (!currentUser.stories) currentUser.stories = [];
+                            currentUser.stories.push({ image: url, caption: 'My story' });
+                            saveData(appData);
+                            renderStories();
+                            showToast('Story added! 🎉');
+                        }
+                        return;
+                    }
+                    const user = appData.users.find(u => u.id === uid);
+                    if (user && user.stories && user.stories.length > 0) {
+                        openStoryViewer(user);
+                    }
+                });
+            });
+        }
+
+        function openStoryViewer(user) {
+            state.storyUser = user;
+            state.storyIndex = 0;
+            storyViewer.classList.add('show');
+            renderStorySlide();
+            startStoryTimer();
+        }
+
+        function renderStorySlide() {
+            const user = state.storyUser;
+            const index = state.storyIndex;
+            const stories = user.stories;
+            if (!stories || index >= stories.length) {
+                closeStoryViewer();
+                return;
+            }
+            const story = stories[index];
+            storyImage.src = story.image;
+            storyImage.onerror = () => { storyImage.src =
+                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="800" viewBox="0 0 400 800"%3E%3Crect fill="%23333" width="400" height="800"/%3E%3Ctext x="200" y="400" font-size="40" text-anchor="middle" dy=".35em" fill="%23999"%3E📸%3C/text%3E%3C/svg%3E'; };
+            storyCaption.textContent = story.caption || '';
+            storyUserAvatar.src = user.image;
+            storyUserName.textContent = user.name;
+
+            if (!appData.storyViews) appData.storyViews = {};
+            appData.storyViews[user.id] = true;
+            saveData(appData);
+            renderStories();
+
+            storyProgress.innerHTML = '';
+            stories.forEach((_, i) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                if (i < index) {
+                    bar.innerHTML = '<div class="fill" style="width:100%;"></div>';
+                } else if (i === index) {
+                    bar.className = 'bar active';
+                    bar.innerHTML = '<div class="fill"></div>';
+                } else {
+                    bar.innerHTML = '<div class="fill" style="width:0%;"></div>';
+                }
+                storyProgress.appendChild(bar);
+            });
+        }
+
+        function startStoryTimer() {
+            if (state.storyTimer) clearTimeout(state.storyTimer);
+            state.storyTimer = setTimeout(() => {
+                nextStory();
+            }, 5000);
+        }
+
+        function nextStory() {
+            const user = state.storyUser;
+            if (!user) return;
+            if (state.storyIndex < user.stories.length - 1) {
+                state.storyIndex++;
+                renderStorySlide();
+                startStoryTimer();
+            } else {
+                closeStoryViewer();
+            }
+        }
+
+        function prevStory() {
+            if (state.storyIndex > 0) {
+                state.storyIndex--;
+                renderStorySlide();
+                startStoryTimer();
+            } else {
+                closeStoryViewer();
+            }
+        }
+
+        function closeStoryViewer() {
+            storyViewer.classList.remove('show');
+            if (state.storyTimer) {
+                clearTimeout(state.storyTimer);
+                state.storyTimer = null;
+            }
+            storyProgress.innerHTML = '';
+            state.storyUser = null;
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  VIEW SWITCHING (unchanged)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function switchView(view) {
+            state.currentView = view;
+            $$('.view').forEach(v => v.classList.remove('active'));
+            $$('.bottom-tab button').forEach(b => b.classList.remove('active'));
+
+            if (view === 'swipe') {
+                swipeView.classList.add('active');
+                document.querySelector('.bottom-tab button[data-tab="swipe"]')?.classList.add('active');
+                renderStack();
+                renderStories();
+            } else if (view === 'matches') {
+                matchesView.classList.add('active');
+                document.querySelector('.bottom-tab button[data-tab="matches"]')?.classList.add('active');
+                renderMatches();
+            } else if (view === 'chat') {
+                chatView.classList.add('active');
+            } else if (view === 'profile') {
+                profileView.classList.add('active');
+                document.querySelector('.bottom-tab button[data-tab="profile"]')?.classList.add('active');
+                renderProfile();
+            }
+            matchPopup.classList.remove('show');
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  PROFILE (unchanged)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function renderProfile() {
+            if (!currentUser) return;
+            const me = currentUser;
+            profileCover.src = me.image;
+            profileCover.onerror = () => { profileCover.src =
+                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="180" viewBox="0 0 400 180"%3E%3Crect fill="%23e8e8ea" width="400" height="180"/%3E%3Ctext x="200" y="90" font-size="40" text-anchor="middle" dy=".35em" fill="%23999"%3E📸%3C/text%3E%3C/svg%3E'; };
+            profileName.textContent = me.name;
+            profileAgeLocation.textContent = `${me.age} · ${me.location}`;
+            profileBio.textContent = me.bio;
+            profileInterests.innerHTML = (me.interests || []).map(i => `<span>#${i}</span>`).join('');
+
+            statLikes.textContent = appData.liked.length;
+            statMatches.textContent = appData.matches.length;
+            statViews.textContent = appData.profileViews || 0;
+
+            if (!appData.profileViews) appData.profileViews = 0;
+            appData.profileViews++;
+            saveData(appData);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  RESET (unchanged)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function resetApp() {
+            if (!confirm('Reset all data? This will clear your matches, likes, and messages.')) return;
+            if (currentUser) {
+                appData.liked = [];
+                appData.passed = [];
+                appData.matches = [];
+                appData.chatMessages = {};
+                appData.storyViews = {};
+                appData.profileViews = 0;
+                saveData(appData);
+                state.currentIndex = 0;
+                state.isAnimating = false;
+                matchPopup.classList.remove('show');
+                confettiContainer.innerHTML = '';
+                closeStoryViewer();
+                updateBadges();
+                if (state.currentView === 'swipe') {
+                    renderStack();
+                    renderStories();
+                } else {
+                    switchView('swipe');
+                }
+                renderMatches();
+                showToast('Data reset! 🔄');
+            }
+        }
+        window.resetApp = resetApp;
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  INIT APP
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function initApp() {
+            appMain.classList.add('visible');
+            loginOverlay.classList.add('hidden');
+            renderStack();
+            renderMatches();
+            updateBadges();
+            renderStories();
+            switchView('swipe');
+            console.log('❤️ Flutter — Logged in as', currentUser?.name);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  EVENT BINDING (buttons etc) – unchanged
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        btnLike.addEventListener('click', () => {
+            if (state.isAnimating || !currentUser) return;
+            const user = getNextUser();
+            if (!user) return;
+            const card = state.currentCardEl;
+            if (card) {
+                const likeInd = card.querySelector('.like-indicator');
+                likeInd.classList.add('show');
+                card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                card.style.transform = 'translate(120%, -40px) rotate(20deg)';
+                card.style.opacity = '0';
+            }
+            setTimeout(() => likeUser(user, card), 100);
+        });
+
+        btnNope.addEventListener('click', () => {
+            if (state.isAnimating || !currentUser) return;
+            const user = getNextUser();
+            if (!user) return;
+            const card = state.currentCardEl;
+            if (card) {
+                const nopeInd = card.querySelector('.nope-indicator');
+                nopeInd.classList.add('show');
+                card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                card.style.transform = 'translate(-120%, -40px) rotate(-20deg)';
+                card.style.opacity = '0';
+            }
+            setTimeout(() => passUser(user, card), 100);
+        });
+
+        btnSuper.addEventListener('click', () => {
+            if (state.isAnimating || !currentUser) return;
+            const user = getNextUser();
+            if (!user) return;
+            const card = state.currentCardEl;
+            if (card) {
+                const likeInd = card.querySelector('.like-indicator');
+                likeInd.classList.add('show');
+                likeInd.textContent = '⭐ SUPER';
+                likeInd.style.color = '#2979ff';
+                likeInd.style.borderColor = '#2979ff';
+                card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                card.style.transform = 'translate(0, -80px) scale(1.05) rotate(0deg)';
+                card.style.opacity = '0';
+            }
+            setTimeout(() => {
+                if (!appData.liked.includes(user.id)) appData.liked.push(user.id);
+                if (!appData.matches.includes(user.id)) {
+                    appData.matches.push(user.id);
+                    if (!appData.chatMessages[user.id]) {
+                        appData.chatMessages[user.id] = [
+                            { text: `🌟 Super liked you!`, fromMe: true, time: new Date().toISOString() },
+                            { text: `Oh wow! I'm flattered! 🥰`, fromMe: false, time: new Date().toISOString() },
+                        ];
+                    }
+                    saveData(appData);
+                    updateBadges();
+                    setTimeout(() => {
+                        showMatchPopup(user);
+                        state.isAnimating = false;
+                    }, 450);
+                } else {
+                    saveData(appData);
+                    updateBadges();
+                    state.isAnimating = false;
+                    renderStack();
+                }
+                state.isAnimating = true;
+                setTimeout(() => {
+                    state.isAnimating = false;
+                    renderStack();
+                }, 600);
+            }, 100);
+        });
+
+        resetBtn.addEventListener('click', resetApp);
+
+        notifBtn.addEventListener('click', () => {
+            if (appData.matches.length > 0) {
+                switchView('matches');
+            } else {
+                showToast('No notifications yet. Keep swiping! 💕');
+            }
+        });
+
+        document.querySelectorAll('.bottom-tab button[data-tab]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                if (tab === 'swipe') switchView('swipe');
+                else if (tab === 'matches') switchView('matches');
+                else if (tab === 'profile') switchView('profile');
+            });
+        });
+
+        matchKeepBtn.addEventListener('click', () => {
+            matchPopup.classList.remove('show');
+            confettiContainer.innerHTML = '';
+            renderStack();
+        });
+
+        matchChatBtn.addEventListener('click', () => {
+            const uid = parseInt(matchChatBtn.dataset.userId);
+            matchPopup.classList.remove('show');
+            confettiContainer.innerHTML = '';
+            openChat(uid);
+        });
+
+        chatBack.addEventListener('click', () => {
+            switchView('matches');
+            renderMatches();
+        });
+
+        chatSend.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        profileEditBtn.addEventListener('click', () => {
+            const newName = prompt('Display name:', currentUser?.name || '');
+            if (newName && currentUser) {
+                currentUser.name = newName;
+                saveData(appData);
+                renderProfile();
+                showToast('Profile updated! ✅');
+            }
+        });
+
+        storyClose.addEventListener('click', closeStoryViewer);
+        storyNext.addEventListener('click', nextStory);
+        storyPrev.addEventListener('click', prevStory);
+
+        document.querySelectorAll('.ad-cta, .ad-banner, .ad-match, .chat-ad .ad-cta').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showToast('✨ Premium feature — coming soon!');
+            });
+        });
+        adBannerSwipe.addEventListener('click', () => showToast('💎 Upgrade to Premium to see who liked you!'));
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  KEYBOARD SHORTCUTS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        document.addEventListener('keydown', (e) => {
+            if (storyViewer.classList.contains('show')) {
+                if (e.key === 'ArrowRight') nextStory();
+                else if (e.key === 'ArrowLeft') prevStory();
+                else if (e.key === 'Escape') closeStoryViewer();
+                return;
+            }
+            if (matchPopup.classList.contains('show')) {
+                if (e.key === 'Escape') {
+                    matchPopup.classList.remove('show');
+                    confettiContainer.innerHTML = '';
+                }
+                return;
+            }
+            if (e.key === 'ArrowRight' || e.key === 'l') btnLike.click();
+            else if (e.key === 'ArrowLeft' || e.key === 'p') btnNope.click();
+            else if (e.key === 'ArrowUp' || e.key === 's') btnSuper.click();
+            else if (e.key === 'r') resetApp();
+            else if (e.key === 'm') switchView('matches');
+            else if (e.key === '1') switchView('swipe');
+            else if (e.key === '3') switchView('profile');
+            else if (e.key === 'Escape') {
+                matchPopup.classList.remove('show');
+                confettiContainer.innerHTML = '';
+                closeStoryViewer();
+            }
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  AUTO-LOGIN if user exists
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        if (appData.currentUser) {
+            const user = appData.users.find(u => u.id === appData.currentUser);
+            if (user) {
+                currentUser = user;
+                loginUser(user.id);
+                initApp();
+            } else {
+                appData.currentUser = null;
+                saveData(appData);
+            }
+        }
+
+        console.log('❤️ Flutter Dating App v2.1 — Login fixed');
+        console.log('📦 Data stored in localStorage');
+        console.log('⌨️ Shortcuts: ←/p=pass, →/l=like, ↑/s=super, r=reset, m=matches, 1=swipe, 3=profile');
+        console.log('👤 Current user:', currentUser?.name || 'Not logged in');
+        console.log('💡 Create an account or use guest mode to start.');
+    </script>
+</body>
+</html>
